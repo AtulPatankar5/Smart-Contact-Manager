@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://thymeleaf.org"
+	th:replace="non-admin/base::layout(~{::section})">
+<head>
+<meta charset="ISO-8859-1">
+<title>Add Contact</title>
+
+<!-- Font Awesome -->
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+
+<body>
+
+	<section>
+
+		<div class="card w-100 bg-white shadow">
+			<div class="card-body">
+				<h2 class="text-center mb-4">
+					<i class="fa-solid fa-user-plus text-primary"></i> Add Contact
+				</h2>
+
+				<div class="container-fluid">
+					<div class="row">
+						<div class="col-md-10 offset-md-1">
+
+							<form th:action="@{/user/process-contact}" th:object="${contact}"
+								method="POST" enctype="multipart/form-data" class="mt-3">
+
+								<!-- First Name -->
+								<div class="input-group mb-3">
+									<span class="input-group-text"> <i
+										class="fa-solid fa-user"></i>
+									</span> <input required type="text" id="name" name="name"
+										th:field="*{name}" class="form-control"
+										placeholder="First Name">
+								</div>
+
+								<!-- Second Name -->
+								<div class="input-group mb-3">
+									<span class="input-group-text"> <i
+										class="fa-solid fa-user-tag"></i>
+									</span> <input type="text" required th:field="*{secondName}"
+										name="secondName" id="secondName" class="form-control"
+										placeholder="Last Name">
+								</div>
+
+								<!-- Work -->
+								<div class="input-group mb-3">
+									<span class="input-group-text"> <i
+										class="fa-solid fa-briefcase"></i>
+									</span> <input type="text" required th:field="*{work}" id="work"
+										name="work" class="form-control" placeholder="Occupation">
+								</div>
+
+								<!-- Email -->
+								<div class="input-group mb-3">
+									<span class="input-group-text"> <i
+										class="fa-solid fa-envelope"></i>
+									</span> <input required type="email" th:field="*{email}" id="email"
+										name="email" class="form-control" placeholder="Email Address">
+								</div>
+
+								<!-- Phone -->
+								<div class="input-group mb-3">
+									<span class="input-group-text"> <i
+										class="fa-solid fa-phone"></i>
+									</span> <input required type="number" min="1000000000"
+										max="9999999999" name="phone" id="phone" th:field="*{phone}"
+										class="form-control" placeholder="Phone Number">
+								</div>
+
+								<!-- Image -->
+								<div class="input-group mb-3">
+									<span class="input-group-text"> <i
+										class="fa-solid fa-image"></i>
+									</span> <input type="file" name="profileImage" id="profileImage"
+										class="form-control">
+								</div>
+
+								<!-- Description -->
+								<div class="input-group mb-3">
+									<span class="input-group-text"> <i
+										class="fa-solid fa-file-lines"></i>
+									</span>
+									<textarea th:field="*{description}" id="description"
+										name="description" class="form-control" rows="5"
+										placeholder="Description"></textarea>
+								</div>
+
+								<!-- Submit Button -->
+								<div class="text-center">
+									<button type="submit" class="btn btn-primary px-4">
+										<i class="fa-solid fa-floppy-disk"></i> Save Contact
+									</button>
+								</div>
+
+							</form>
+
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<script
+			src="https://cdn.tiny.cloud/1/p7buy8vda4kq49aortzooz26ioy0tux262ophy6ldhjgd9jy/tinymce/8/tinymce.min.js"
+			referrerpolicy="origin" crossorigin="anonymous"></script>
+
+		<script>
+			tinymce.init({
+				selector : '#description',
+			})
+		</script>
+	</section>
+
+</body>
+</html>

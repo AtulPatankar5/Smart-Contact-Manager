@@ -3,6 +3,8 @@ package com.smart.entities;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,12 +13,17 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @Entity
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private int id;
+	
+	@NotBlank(message="Name field should not be blank")
+	@Size(min=4, max=100, message="Minimum 2 character and max 20")
 	private String name;
 
 	@Column(unique = true)

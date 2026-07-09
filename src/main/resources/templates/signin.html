@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://thymeleaf.org"
+	th:replace="base::layout(~{::section})">
+<head>
+<meta charset="ISO-8859-1">
+<title>Login Page</title>
+</head>
+<body>
+	<section>
+		<div id="login">
+			<div class="container">
+				<div id="login-row"
+					class="row justify-content-center align-items-center gap-4">
+					<div id="login-column" class="col-md-6">
+						<div id="login-box" class="col-md-12">
+							<form id="login-form" class="form" method="post"
+								th:action="@{/dologin}">
+
+								<h3 class="text-center text-info">Login</h3>
+
+								<div th:if="${param.error}" class="alert alert-danger">
+									Invalid user name or password</div>
+								<div th:if="${param.logout}" class="alert alert-success">You
+									have been logged Out</div>
+
+
+								<div class="mb-3">
+									<label for="username" class="text-info">Username</label> <input
+										type="text" name="username" id="username" class="form-control">
+								</div>
+
+								<div class="mb-3">
+									<label for="password" class="text-info">Password</label> <input
+										type="password" name="password" id="password"
+										class="form-control">
+								</div>
+
+								<div class="remember form-check mb-3">
+									<input class="form-check-input" type="checkbox"
+										id="remember-me" name="remember-me"> <label
+										class="form-check-label text-info" for="remember-me">
+										Remember me </label>
+								</div>
+
+								<button type="submit" class="btn btn-info">Login</button>
+
+								<div id="register-link">
+									<a th:href="@{/signup}" class="text-info"> Register here </a>
+								</div>
+
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</body>
+</html>
