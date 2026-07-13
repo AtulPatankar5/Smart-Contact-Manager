@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.Principal;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.smart.dao.ContactRepository;
 import com.smart.dao.UserRepository;
 import com.smart.entities.Contact;
 import com.smart.entities.User;
@@ -33,6 +35,9 @@ public class UserController {
 
 	@Autowired
 	private UserRepository userRepo;
+
+	@Autowired
+	private ContactRepository contactRepo;
 
 	@ModelAttribute
 	public void addCommonData(Model model, Principal principal) {
@@ -84,7 +89,21 @@ public class UserController {
 			e.printStackTrace();
 		}
 		System.out.println("Contact saved !!");
-		return "redirect:/user/add-contact";
+		return "redirect:/user/view-contacts";// redirect back to add contact page
+	}
+
+	@GetMapping("/view-contacts")
+	public String getContacts(Model model, Principal principal) {
+		model.addAttribute("title", "Show all contacts");
+		String userName = principal.getName();
+
+		User user = userRepo.getUserByUserName(userName);
+
+		List<Contact> contacts = contactRepo.findContactsByUser(user.getId());
+		
+		model.addAttribute("contacts", contacts);
+		
+		return "non-admin/contacts-list";
 	}
 
 }

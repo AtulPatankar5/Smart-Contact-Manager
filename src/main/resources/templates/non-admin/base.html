@@ -17,37 +17,48 @@
 	crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
-	<nav class="fixed-top navbar navbar-expand-lg bg-theme">
+	<nav class="fixed-top navbar navbar-expand-lg navbar-dark bg-theme">
 		<div class="container-fluid">
-			<a class="navbar-brand" href="#">Smart Contact Manager</a>
+
+			<a class="navbar-brand" th:href="@{/}"> Smart Contact Manager </a>
+
 			<button class="navbar-toggler" type="button"
-				data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-				aria-controls="navbarSupportedContent" aria-expanded="false"
-				aria-label="Toggle navigation">
+				data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
 				<span class="navbar-toggler-icon"></span>
 			</button>
-			<div class="collapse navbar-collapse" id="navbarSupportedContent">
-				<ul class="navbar-nav ms-auto mb-2 mb-lg-0 text-uppercase">
-					<li class="nav-item"><a class="nav-link active"
-						aria-current="page" th:href="@{/}"> Home</a></li>
-					<li class="nav-item"><a class="nav-link"><span
-							th:text="${user.name}"></span></a></li>
 
-					<form th:action="@{/logout}" method="post" class="d-inline">
-						<button type="submit" class="btn btn-link nav-link border-0 p-0">
-							Logout</button>
-					</form>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+				<ul class="navbar-nav ms-auto align-items-center text-uppercase">
+
+					<li class="nav-item"><a class="nav-link active" th:href="@{/}">
+							Home </a></li>
+
+					<li class="nav-item"><a class="nav-link" href="#"> <span
+							th:text="${user.name}"></span>
+					</a></li>
+
+					<li class="nav-item">
+						<form th:action="@{/logout}" method="post" class="m-0">
+							<button type="submit"
+								class="btn btn-link nav-link text-white text-decoration-none p-0">
+								Logout</button>
+						</form>
+					</li>
 
 				</ul>
+
 			</div>
+
 		</div>
 	</nav>
 
 	<div class="sidebar mt-4">
 		<span class="cross-btn" onclick="togglesidebar()">&times;</span> <a
 			th:href="@{/user/index}" href="" class="item"><i
-			class="fas fa-home"></i>Home</a> <a href="" class="item"> <i
-			class="fas fa-id-badge"></i>View Contacts
+			class="fas fa-home"></i>Home</a> <a th:href="@{/user/view-contacts}"
+			href="" class="item"> <i class="fas fa-id-badge"></i>View
+			Contacts
 		</a> <a th:href="@{/user/add-contact}" href="" class="item"><i
 			class="fas fa-user-plus"></i>Add Contact</a> <a href="" class="item"><i
 			class="fas fa-user-circle"></i>Your Profile</a> <a href="" class="item"><i

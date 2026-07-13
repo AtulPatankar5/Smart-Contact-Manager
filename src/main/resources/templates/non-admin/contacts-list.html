@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://thymeleaf.org"
+	th:replace="non-admin/base::layout(~{::section})">
+<head>
+<meta charset="ISO-8859-1">
+<title>Contacts Page</title>
+</head>
+<body>
+	<section>
+
+		<div class="card ml-3 mr-3" style="width: unset">
+			<div class="card-body" style="background: white">
+				<h1 class="text-center">Your Contacts</h1>
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th scope="col">Id</th>
+							<th scope="col">First Name</th>
+							<th scope="col">Last Name</th>
+							<th scope="col">Work</th>
+							<th scope="col">email</th>
+							<th scope="col">Phone</th>
+							<th scope="col" class="text-center">Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="contact : ${contacts}">
+							<th th:text="${contact.cid}"></th>
+							<td th:text="${contact.name}"></td>
+							<td th:text="${contact.secondName}"></td>
+							<td th:text="${contact.work}"></td>
+							<td th:text="${contact.email}"></td>
+							<td th:text="${contact.phone}"></td>
+							<td class="text-center"><a
+								th:href="@{'/user/update-contact/' + ${contact.cid}}"
+								class="btn btn-sm btn-primary me-2"> <i class="fas fa-edit"></i>
+								
+							</a> <a th:href="@{'/user/delete-contact/' + ${contact.cid}}"
+								class="btn btn-sm btn-danger"
+								onclick="return confirm('Are you sure you want to delete this contact?');">
+									<i class="fas fa-trash"></i> 
+							</a></td>
+
+						</tr>
+
+					</tbody>
+				</table>
+
+			</div>
+		</div>
+
+	</section>
+</body>
+</html>
