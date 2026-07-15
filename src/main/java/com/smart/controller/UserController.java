@@ -8,13 +8,19 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -69,6 +75,7 @@ public class UserController {
 			User user = userRepo.getUserByUserName(name);
 			if (file.isEmpty()) {
 				System.out.println("File is empty");
+				contact.setImage("contact.png");
 			} else {
 				contact.setImage(file.getOriginalFilename());
 
@@ -89,21 +96,70 @@ public class UserController {
 			e.printStackTrace();
 		}
 		System.out.println("Contact saved !!");
-		return "redirect:/user/view-contacts";// redirect back to add contact page
+		return "redirect:/user/view-contacts/1";// redirect back to View contact page
 	}
 
-	@GetMapping("/view-contacts")
-	public String getContacts(Model model, Principal principal) {
+	// pagination: per page n=5 and currentPage=0[page]
+	@GetMapping("/view-contacts/{page}")
+	public String getContacts(@PathVariable("page") Integer page, Model model, Principal principal) {
 		model.addAttribute("title", "Show all contacts");
 		String userName = principal.getName();
 
 		User user = userRepo.getUserByUserName(userName);
 
-		List<Contact> contacts = contactRepo.findContactsByUser(user.getId());
-		
+		Pageable pageRequest = PageRequest.of(page - 1, 5);
+		Page<Contact> contacts = contactRepo.findContactsByUser(user.getId(), pageRequest);
+
 		model.addAttribute("contacts", contacts);
-		
+		model.addAttribute("currentPage", page - 1);
+		model.addAttribute("totalPages", contacts.getTotalPages());
+
 		return "non-admin/contacts-list";
 	}
 
+	@GetMapping("/{cId}/contact")
+	public String getContactDetails(@PathVariable("cId") Integer cId, Model model, Principal principal) {
+		Optional<Contact> contactOptional = contactRepo.findById(cId);
+		Contact contact = contactOptional.get();
+
+		String usernameLoggedIn = principal.getName();
+		User user = userRepo.getUserByUserName(usernameLoggedIn);
+		if (contact.getUser().getId() == user.getId()) {
+			model.addAttribute("title", contact.getName());
+			model.addAttribute("contact", contact);
+		}
+		return "non-admin/contact_details";
+	}
+
+	@GetMapping("/delete-contact/{cid}")
+	public String deleteContact(@PathVariable("cid") Integer cid, Model model, Principal principal,
+			HttpSession session) {
+
+		Optional<Contact> optionalContact = contactRepo.findById(cid);
+		Contact contact = optionalContact.get();
+
+		String username = principal.getName();
+		User user = userRepo.getUserByUserName(username);
+		if (contact.getUser().getId() == user.getId()) {
+			contactRepo.delete(contact);
+		}
+
+		session.setAttribute("message", new Message("Contact Delete Successfully", "success"));
+		return "redirect:/user/view-contacts/1";
+	}
+
+	// edit contact
+	@PostMapping("/update-contact/{cid}")
+	public String editContact(@PathVariable("cid") Integer cid, Principal principal, Model model) {
+
+		String LoggedInUser = principal.getName();
+		User user = userRepo.getUserByUserName(LoggedInUser);
+
+		Optional<Contact> optional = contactRepo.findById(cid);
+		Contact contact = optional.get();
+		if (user.getId() == contact.getUser().getId())
+			model.addAttribute("contact", contact);
+		model.addAttribute("title", "Update Contact");
+		return "non-admin/edit-contact";
+	}
 }

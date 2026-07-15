@@ -227,3 +227,10 @@ input:focus {
 		margin-left: 0% !important;
 	}
 }
+
+.my_profile_pic {
+	width: 30px;
+	height: 30px;
+	object-fit:cover;
+	border-radius: 50%;
+}

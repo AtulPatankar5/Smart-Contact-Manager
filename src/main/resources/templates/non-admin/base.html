@@ -56,7 +56,7 @@
 	<div class="sidebar mt-4">
 		<span class="cross-btn" onclick="togglesidebar()">&times;</span> <a
 			th:href="@{/user/index}" href="" class="item"><i
-			class="fas fa-home"></i>Home</a> <a th:href="@{/user/view-contacts}"
+			class="fas fa-home"></i>Home</a> <a th:href="@{/user/view-contacts/1}"
 			href="" class="item"> <i class="fas fa-id-badge"></i>View
 			Contacts
 		</a> <a th:href="@{/user/add-contact}" href="" class="item"><i
@@ -87,5 +87,35 @@
 
 	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 	<script src="" th:src="@{/js/script.js}"></script>
+	<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+	<script>
+	function deleteContact(cid) {
+	    swal({
+	        title: "Are you sure?",
+	        text: "You want to delete this contact?",
+	        icon: "warning",
+	        buttons: true,
+	        dangerMode: true,
+	    }).then((willDelete) => {
+
+	        if (willDelete) {
+
+	            swal({
+	                title: "Success!",
+	                text: "Your contact will be deleted.",
+	                icon: "success",
+	                buttons: false
+	            });
+
+	            setTimeout(() => {
+	                window.location.href = "/user/delete-contact/" + cid;
+	            }, 2000);
+
+	        } else {
+	            swal("Your contact is safe!");
+	        }
+	    });
+	}
+	</script>
 </body>
 </html>

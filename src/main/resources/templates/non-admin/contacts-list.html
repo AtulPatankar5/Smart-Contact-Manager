@@ -26,26 +26,51 @@
 					<tbody>
 						<tr th:each="contact : ${contacts}">
 							<th th:text="${contact.cid}"></th>
-							<td th:text="${contact.name}"></td>
+							<td><img class="my_profile_pic"
+								th:src="${contact.image != null and !#strings.isEmpty(contact.image)}
+                 ? @{'/image/' + ${contact.image}}
+                 : @{/image/contact.png}"
+								alt="Contact Image" /> <span th:text="${contact.name}"></span></td>
 							<td th:text="${contact.secondName}"></td>
 							<td th:text="${contact.work}"></td>
-							<td th:text="${contact.email}"></td>
-							<td th:text="${contact.phone}"></td>
-							<td class="text-center"><a
-								th:href="@{'/user/update-contact/' + ${contact.cid}}"
-								class="btn btn-sm btn-primary me-2"> <i class="fas fa-edit"></i>
-								
-							</a> <a th:href="@{'/user/delete-contact/' + ${contact.cid}}"
-								class="btn btn-sm btn-danger"
-								onclick="return confirm('Are you sure you want to delete this contact?');">
-									<i class="fas fa-trash"></i> 
+							<td><a href=""
+								th:href="@{'/user/'+${contact.cid}+'/contact'}"> <span
+									th:text="${contact.email}"></span>
 							</a></td>
+							<td th:text="${contact.phone}"></td>
+							<td class="text-center">
+
+								<form th:action="@{'/user/update-contact/' + ${contact.cid}}"
+									method="post" style="display: inline;">
+									<button type="submit" class="btn btn-sm btn-primary">
+										<i class="fas fa-edit"></i>
+									</button>
+								</form> <a class="btn btn-sm btn-danger"
+								th:onclick="|deleteContact(${contact.cid})|"> <i
+									class="fas fa-trash"></i>
+							</a>
+							</td>
 
 						</tr>
 
 					</tbody>
 				</table>
 
+				<nav aria-label="...">
+					<ul class="pagination">
+						<li th:if="${currentPage!=0}" class="page-item"><a
+							th:href="@{'/user/view-contacts/'+${currentPage}}"
+							class="page-link" href="#" tabindex="-1">Previous</a></li>
+						<li th:classappend="${currentPage==i-1?'active':''}"
+							th:each="i: ${#numbers.sequence(1,totalPages)}" class="page-item"><a
+							th:href="@{'/user/view-contacts/'+${i}}" class="page-link"
+							href="#"><span th:text="${i}"></span></a></li>
+
+						<li th:if="${currentPage+1!=totalPages}" class="page-item"><a
+							th:href="@{'/user/view-contacts/'+${currentPage+2}}"
+							class="page-link" href="#">Next</a></li>
+					</ul>
+				</nav>
 			</div>
 		</div>
 
