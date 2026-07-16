@@ -133,7 +133,7 @@ public class UserController {
 
 	@GetMapping("/delete-contact/{cid}")
 	public String deleteContact(@PathVariable("cid") Integer cid, Model model, Principal principal,
-			HttpSession session) {
+			RedirectAttributes redirectAttributes) {
 
 		Optional<Contact> optionalContact = contactRepo.findById(cid);
 		Contact contact = optionalContact.get();
@@ -144,7 +144,7 @@ public class UserController {
 			contactRepo.delete(contact);
 		}
 
-		session.setAttribute("message", new Message("Contact Delete Successfully", "success"));
+		redirectAttributes.addFlashAttribute("message", new Message("Contact Delete Successfully", "success"));
 		return "redirect:/user/view-contacts/1";
 	}
 
@@ -161,5 +161,56 @@ public class UserController {
 			model.addAttribute("contact", contact);
 		model.addAttribute("title", "Update Contact");
 		return "non-admin/edit-contact";
+	}
+
+	// update the contact
+	@PostMapping("/process-update-contact")
+	public String updateSelectedContact(@ModelAttribute Contact contact,
+			@RequestParam("profileImage") MultipartFile file, Model model, HttpSession httpSession, Principal principal,
+			RedirectAttributes redirectAttributes) {
+
+		Contact oldContact = contactRepo.findById(contact.getCid()).get();
+
+		try {
+			if (!file.isEmpty()) {
+
+				// Delete old image from source
+				if (oldContact.getImage() != null) {
+
+					File deleteFile = new ClassPathResource("static/image").getFile();
+					File fileDelete = new File(deleteFile, oldContact.getImage());
+					fileDelete.delete();
+				}
+
+				// Add new image from source
+				File saveFile = new ClassPathResource("static/image").getFile();
+				Path path = Paths.get(saveFile.getAbsolutePath() + File.separator + file.getOriginalFilename());
+				// to copy in the target folder
+				Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+				contact.setImage(file.getOriginalFilename());
+
+			} else {
+				contact.setImage(oldContact.getImage());
+			}
+
+			User user = userRepo.getUserByUserName(principal.getName());
+			contact.setUser(user);
+			contactRepo.save(contact);
+			redirectAttributes.addFlashAttribute("message", new Message("You cantact is updated", "success"));
+
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		return "redirect:/user/" + contact.getCid() + "/contact";
+	}
+
+	@GetMapping("/profile")
+	public String profileDetails(Model model, Principal principal) {
+		String loggedInUser = principal.getName();
+		User user = userRepo.getUserByUserName(loggedInUser);
+		model.addAttribute("title", "Profile Details");
+		model.addAttribute("user", user);
+		return "non-admin/profile-details-page";
 	}
 }

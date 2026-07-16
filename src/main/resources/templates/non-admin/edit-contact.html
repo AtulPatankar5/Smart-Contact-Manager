@@ -21,6 +21,7 @@
 								th:object="${contact}" method="POST"
 								enctype="multipart/form-data" class="mt-3">
 
+								<input type="hidden" th:value="${contact.cid}" name="cid"/>
 								<!-- First Name -->
 								<div class="input-group mb-3">
 									<span class="input-group-text"> <i
@@ -68,14 +69,14 @@
 								</div>
 
 								<!-- Image -->
-								
-								<div class="container">
+
+								<!-- <div class="container">
 									<img class="img-fluid my_profile_pic text-center"style="width:250px; height:250px" th:src="@{'/img/'+${contact.image}}" alt="" />
-								</div>
+								</div> -->
 								<div class="input-group mb-3">
 									<span class="input-group-text"> <i
 										class="fa-solid fa-image"></i>
-									</span> <input type="file" name="image" id="image"
+									</span> <input type="file" name="profileImage" id="profileImage"
 										th:value="${contact.image}" class="form-control">
 								</div>
 
