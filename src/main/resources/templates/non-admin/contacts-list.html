@@ -11,6 +11,17 @@
 		<div class="card ml-3 mr-3" style="width: unset">
 			<div class="card-body" style="background: white">
 				<h1 class="text-center">Your Contacts</h1>
+				<form th:action="@{/user/search-contact}" method="get">
+					<div class="search-wrapper my-3 ">
+
+						<div class="search-box">
+							<input  name="query" type="text" class="search-input form-control"
+								placeholder="Search anything..."> <i
+								class="fas fa-search search-icon"></i>
+						</div>
+					</div>
+				</form>
+				
 				<table class="table table-striped">
 					<thead>
 						<tr>
@@ -73,7 +84,6 @@
 				</nav>
 			</div>
 		</div>
-
 	</section>
 </body>
 </html>

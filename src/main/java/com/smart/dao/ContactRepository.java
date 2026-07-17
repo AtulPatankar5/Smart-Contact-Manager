@@ -14,4 +14,7 @@ public interface ContactRepository extends JpaRepository<Contact, Integer>{
 	
 	@Query("from Contact as c where c.user.id=:userId ORDER BY c.cid DESC")
 	public Page<Contact> findContactsByUser(@Param("userId") int userId, Pageable pageable);
+
+	@Query("select c from Contact c where lower( c.name) like lower(concat('%',:query,'%'))")
+	public Page<Contact> findContactsByName(@Param("query") String query, Pageable pageable);
 }

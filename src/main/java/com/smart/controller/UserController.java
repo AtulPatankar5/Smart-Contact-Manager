@@ -213,4 +213,18 @@ public class UserController {
 		model.addAttribute("user", user);
 		return "non-admin/profile-details-page";
 	}
+
+	@GetMapping("/search-contact")
+	public String searchContact(@RequestParam("query") String query, Model model) {
+
+		Pageable pageable = PageRequest.of(0, 5);
+
+	    Page<Contact> contacts = contactRepo.findContactsByName(query, pageable);
+
+	    model.addAttribute("contacts", contacts);
+	    model.addAttribute("currentPage", 0);
+	    model.addAttribute("totalPages", contacts.getTotalPages());
+
+	    return "non-admin/contacts-list";
+	}
 }
