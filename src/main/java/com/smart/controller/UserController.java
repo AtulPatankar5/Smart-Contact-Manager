@@ -15,6 +15,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -39,192 +40,218 @@ import jakarta.servlet.http.HttpSession;
 @RequestMapping("/user")
 public class UserController {
 
-	@Autowired
-	private UserRepository userRepo;
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-	@Autowired
-	private ContactRepository contactRepo;
+    @Autowired
+    private UserRepository userRepo;
 
-	@ModelAttribute
-	public void addCommonData(Model model, Principal principal) {
-		String name = principal.getName();
-		User user = userRepo.getUserByUserName(name);
+    @Autowired
+    private ContactRepository contactRepo;
+
+    @ModelAttribute
+    public void addCommonData(Model model, Principal principal) {
+        String name = principal.getName();
+        User user = userRepo.getUserByUserName(name);
 //		System.out.println("name-->" + user);
-		model.addAttribute("user", user);
-	}
+        model.addAttribute("user", user);
+    }
 
-	@GetMapping("/index")
-	public String dashboard(Model model, Principal principal) {
-		model.addAttribute("title", "User Dashboard");
-		return "non-admin/user_dashboard";
-	}
+    @GetMapping("/index")
+    public String dashboard(Model model, Principal principal) {
+        model.addAttribute("title", "User Dashboard");
+        return "non-admin/user_dashboard";
+    }
 
-	@GetMapping("/add-contact")
-	public String openAddContactForm(Model model) {
-		model.addAttribute("title", "Add Contact");
-		model.addAttribute("contact", new Contact());
-		return "non-admin/addContact";
-	}
+    @GetMapping("/add-contact")
+    public String openAddContactForm(Model model) {
+        model.addAttribute("title", "Add Contact");
+        model.addAttribute("contact", new Contact());
+        return "non-admin/addContact";
+    }
 
-	@PostMapping("/process-contact")
-	public String processContact(@ModelAttribute Contact contact, @RequestParam("profileImage") MultipartFile file,
-			Principal principal, RedirectAttributes redirectAttributes) {
-		try {
+    @PostMapping("/process-contact")
+    public String processContact(@ModelAttribute Contact contact, @RequestParam("profileImage") MultipartFile file,
+                                 Principal principal, RedirectAttributes redirectAttributes) {
+        try {
 
-			String name = principal.getName();
-			User user = userRepo.getUserByUserName(name);
-			if (file.isEmpty()) {
-				System.out.println("File is empty");
-				contact.setImage("contact.png");
-			} else {
-				contact.setImage(file.getOriginalFilename());
+            String name = principal.getName();
+            User user = userRepo.getUserByUserName(name);
+            if (file.isEmpty()) {
+                System.out.println("File is empty");
+                contact.setImage("contact.png");
+            } else {
+                contact.setImage(file.getOriginalFilename());
 
-				File saveFile = new ClassPathResource("static/image").getFile();
-				Path path = Paths.get(saveFile.getAbsolutePath() + File.separator + file.getOriginalFilename());
-				// to copy in the target folder
-				Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+                File saveFile = new ClassPathResource("static/image").getFile();
+                Path path = Paths.get(saveFile.getAbsolutePath() + File.separator + file.getOriginalFilename());
+                // to copy in the target folder
+                Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
 
-				System.out.println("image is uploaded");
-			}
-			contact.setUser(user);
-			user.getContacts().add(contact);
-			userRepo.save(user);
-			redirectAttributes.addFlashAttribute("message", new Message("Your contact is added !!!", "success"));
+                System.out.println("image is uploaded");
+            }
+            contact.setUser(user);
+            user.getContacts().add(contact);
+            userRepo.save(user);
+            redirectAttributes.addFlashAttribute("message", new Message("Your contact is added !!!", "success"));
 
-		} catch (Exception e) {
-			redirectAttributes.addFlashAttribute("message", new Message("Your contact is  not added !!!", "danger"));
-			e.printStackTrace();
-		}
-		System.out.println("Contact saved !!");
-		return "redirect:/user/view-contacts/1";// redirect back to View contact page
-	}
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("message", new Message("Your contact is  not added !!!", "danger"));
+            e.printStackTrace();
+        }
+        System.out.println("Contact saved !!");
+        return "redirect:/user/view-contacts/1";// redirect back to View contact page
+    }
 
-	// pagination: per page n=5 and currentPage=0[page]
-	@GetMapping("/view-contacts/{page}")
-	public String getContacts(@PathVariable("page") Integer page, Model model, Principal principal) {
-		model.addAttribute("title", "Show all contacts");
-		String userName = principal.getName();
+    // pagination: per page n=5 and currentPage=0[page]
+    @GetMapping("/view-contacts/{page}")
+    public String getContacts(@PathVariable("page") Integer page, Model model, Principal principal) {
+        model.addAttribute("title", "Show all contacts");
+        String userName = principal.getName();
 
-		User user = userRepo.getUserByUserName(userName);
+        User user = userRepo.getUserByUserName(userName);
 
-		Pageable pageRequest = PageRequest.of(page - 1, 5);
-		Page<Contact> contacts = contactRepo.findContactsByUser(user.getId(), pageRequest);
+        Pageable pageRequest = PageRequest.of(page - 1, 5);
+        Page<Contact> contacts = contactRepo.findContactsByUser(user.getId(), pageRequest);
 
-		model.addAttribute("contacts", contacts);
-		model.addAttribute("currentPage", page - 1);
-		model.addAttribute("totalPages", contacts.getTotalPages());
+        model.addAttribute("contacts", contacts);
+        model.addAttribute("currentPage", page - 1);
+        model.addAttribute("totalPages", contacts.getTotalPages());
 
-		return "non-admin/contacts-list";
-	}
+        return "non-admin/contacts-list";
+    }
 
-	@GetMapping("/{cId}/contact")
-	public String getContactDetails(@PathVariable("cId") Integer cId, Model model, Principal principal) {
-		Optional<Contact> contactOptional = contactRepo.findById(cId);
-		Contact contact = contactOptional.get();
+    @GetMapping("/{cId}/contact")
+    public String getContactDetails(@PathVariable("cId") Integer cId, Model model, Principal principal) {
+        Optional<Contact> contactOptional = contactRepo.findById(cId);
+        Contact contact = contactOptional.get();
 
-		String usernameLoggedIn = principal.getName();
-		User user = userRepo.getUserByUserName(usernameLoggedIn);
-		if (contact.getUser().getId() == user.getId()) {
-			model.addAttribute("title", contact.getName());
-			model.addAttribute("contact", contact);
-		}
-		return "non-admin/contact_details";
-	}
+        String usernameLoggedIn = principal.getName();
+        User user = userRepo.getUserByUserName(usernameLoggedIn);
+        if (contact.getUser().getId() == user.getId()) {
+            model.addAttribute("title", contact.getName());
+            model.addAttribute("contact", contact);
+        }
+        return "non-admin/contact_details";
+    }
 
-	@GetMapping("/delete-contact/{cid}")
-	public String deleteContact(@PathVariable("cid") Integer cid, Model model, Principal principal,
-			RedirectAttributes redirectAttributes) {
+    @GetMapping("/delete-contact/{cid}")
+    public String deleteContact(@PathVariable("cid") Integer cid, Model model, Principal principal,
+                                RedirectAttributes redirectAttributes) {
 
-		Optional<Contact> optionalContact = contactRepo.findById(cid);
-		Contact contact = optionalContact.get();
+        Optional<Contact> optionalContact = contactRepo.findById(cid);
+        Contact contact = optionalContact.get();
 
-		String username = principal.getName();
-		User user = userRepo.getUserByUserName(username);
-		if (contact.getUser().getId() == user.getId()) {
-			contactRepo.delete(contact);
-		}
+        String username = principal.getName();
+        User user = userRepo.getUserByUserName(username);
+        if (contact.getUser().getId() == user.getId()) {
+            contactRepo.delete(contact);
+        }
 
-		redirectAttributes.addFlashAttribute("message", new Message("Contact Delete Successfully", "success"));
-		return "redirect:/user/view-contacts/1";
-	}
+        redirectAttributes.addFlashAttribute("message", new Message("Contact Delete Successfully", "success"));
+        return "redirect:/user/view-contacts/1";
+    }
 
-	// edit contact
-	@PostMapping("/update-contact/{cid}")
-	public String editContact(@PathVariable("cid") Integer cid, Principal principal, Model model) {
+    // edit contact
+    @PostMapping("/update-contact/{cid}")
+    public String editContact(@PathVariable("cid") Integer cid, Principal principal, Model model) {
 
-		String LoggedInUser = principal.getName();
-		User user = userRepo.getUserByUserName(LoggedInUser);
+        String LoggedInUser = principal.getName();
+        User user = userRepo.getUserByUserName(LoggedInUser);
 
-		Optional<Contact> optional = contactRepo.findById(cid);
-		Contact contact = optional.get();
-		if (user.getId() == contact.getUser().getId())
-			model.addAttribute("contact", contact);
-		model.addAttribute("title", "Update Contact");
-		return "non-admin/edit-contact";
-	}
+        Optional<Contact> optional = contactRepo.findById(cid);
+        Contact contact = optional.get();
+        if (user.getId() == contact.getUser().getId())
+            model.addAttribute("contact", contact);
+        model.addAttribute("title", "Update Contact");
+        return "non-admin/edit-contact";
+    }
 
-	// update the contact
-	@PostMapping("/process-update-contact")
-	public String updateSelectedContact(@ModelAttribute Contact contact,
-			@RequestParam("profileImage") MultipartFile file, Model model, HttpSession httpSession, Principal principal,
-			RedirectAttributes redirectAttributes) {
+    // update the contact
+    @PostMapping("/process-update-contact")
+    public String updateSelectedContact(@ModelAttribute Contact contact,
+                                        @RequestParam("profileImage") MultipartFile file, Model model, HttpSession httpSession, Principal principal,
+                                        RedirectAttributes redirectAttributes) {
 
-		Contact oldContact = contactRepo.findById(contact.getCid()).get();
+        Contact oldContact = contactRepo.findById(contact.getCid()).get();
 
-		try {
-			if (!file.isEmpty()) {
+        try {
+            if (!file.isEmpty()) {
 
-				// Delete old image from source
-				if (oldContact.getImage() != null) {
+                // Delete old image from source
+                if (oldContact.getImage() != null) {
 
-					File deleteFile = new ClassPathResource("static/image").getFile();
-					File fileDelete = new File(deleteFile, oldContact.getImage());
-					fileDelete.delete();
-				}
+                    File deleteFile = new ClassPathResource("static/image").getFile();
+                    File fileDelete = new File(deleteFile, oldContact.getImage());
+                    fileDelete.delete();
+                }
 
-				// Add new image from source
-				File saveFile = new ClassPathResource("static/image").getFile();
-				Path path = Paths.get(saveFile.getAbsolutePath() + File.separator + file.getOriginalFilename());
-				// to copy in the target folder
-				Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-				contact.setImage(file.getOriginalFilename());
+                // Add new image from source
+                File saveFile = new ClassPathResource("static/image").getFile();
+                Path path = Paths.get(saveFile.getAbsolutePath() + File.separator + file.getOriginalFilename());
+                // to copy in the target folder
+                Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+                contact.setImage(file.getOriginalFilename());
 
-			} else {
-				contact.setImage(oldContact.getImage());
-			}
+            } else {
+                contact.setImage(oldContact.getImage());
+            }
 
-			User user = userRepo.getUserByUserName(principal.getName());
-			contact.setUser(user);
-			contactRepo.save(contact);
-			redirectAttributes.addFlashAttribute("message", new Message("You cantact is updated", "success"));
+            User user = userRepo.getUserByUserName(principal.getName());
+            contact.setUser(user);
+            contactRepo.save(contact);
+            redirectAttributes.addFlashAttribute("message", new Message("You cantact is updated", "success"));
 
-		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
-		}
-		return "redirect:/user/" + contact.getCid() + "/contact";
-	}
+        } catch (Exception e) {
+            // TODO: handle exception
+            e.printStackTrace();
+        }
+        return "redirect:/user/" + contact.getCid() + "/contact";
+    }
 
-	@GetMapping("/profile")
-	public String profileDetails(Model model, Principal principal) {
-		String loggedInUser = principal.getName();
-		User user = userRepo.getUserByUserName(loggedInUser);
-		model.addAttribute("title", "Profile Details");
-		model.addAttribute("user", user);
-		return "non-admin/profile-details-page";
-	}
+    @GetMapping("/profile")
+    public String profileDetails(Model model, Principal principal) {
+        String loggedInUser = principal.getName();
+        User user = userRepo.getUserByUserName(loggedInUser);
+        model.addAttribute("title", "Profile Details");
+        model.addAttribute("user", user);
+        return "non-admin/profile-details-page";
+    }
 
-	@GetMapping("/search-contact")
-	public String searchContact(@RequestParam("query") String query, Model model) {
+    @GetMapping("/search-contact")
+    public String searchContact(@RequestParam("query") String query, Model model) {
 
-		Pageable pageable = PageRequest.of(0, 5);
+        Pageable pageable = PageRequest.of(0, 5);
 
-	    Page<Contact> contacts = contactRepo.findContactsByName(query, pageable);
+        Page<Contact> contacts = contactRepo.findContactsByName(query, pageable);
 
-	    model.addAttribute("contacts", contacts);
-	    model.addAttribute("currentPage", 0);
-	    model.addAttribute("totalPages", contacts.getTotalPages());
+        model.addAttribute("contacts", contacts);
+        model.addAttribute("currentPage", 0);
+        model.addAttribute("totalPages", contacts.getTotalPages());
 
-	    return "non-admin/contacts-list";
-	}
+        return "non-admin/contacts-list";
+    }
+
+    @GetMapping("/settings")
+    public String openSettings(Model model) {
+        return "non-admin/settings";
+    }
+
+    @PostMapping("/changepassword")
+    public String changePassword(@RequestParam("oldpassword") String oldPassword, @RequestParam("newpassword") String newPassword, Principal principal, RedirectAttributes redirectAttributes) {
+        System.out.println("Old password" + oldPassword);
+        System.out.println("new  password" + newPassword);
+
+        String name = principal.getName();
+        User user = userRepo.getUserByUserName(name);
+        if (bCryptPasswordEncoder.matches(oldPassword, user.getPassword())) {
+            user.setPassword(bCryptPasswordEncoder.encode(newPassword));
+            userRepo.save(user);
+            redirectAttributes.addFlashAttribute("message", new Message("You password is changed", "success"));
+        } else {
+            redirectAttributes.addFlashAttribute("message", new Message("Password changing Failed", "danger "));
+            return "redirect:/user/settings";
+        }
+        return "redirect:/user/index";
+    }
 }

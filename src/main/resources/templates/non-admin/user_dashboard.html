@@ -1,28 +1,27 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://thymeleaf.org"
-	th:replace="non-admin/base::layout(~{::section})">
+      th:replace="non-admin/base::layout(~{::section})">
 <head>
-<meta charset="ISO-8859-1">
-<title>About Page</title>
+    <meta charset="ISO-8859-1">
+    <title>About Page</title>
 </head>
 <body>
-	<section>
-		<div class="container text-center d-flex justify-content-center">
+<section>
+    <div class="container text-center d-flex justify-content-center">
 
-			<div class="card-body bg-white">
-				<div class="container text-center  my-5 " style="height: 500px;">
-					<img style="height: 300px; width: 300px;"
-						th:src="@{/image/contactmanager.jpg}" />
+        <div class="card-body bg-white">
+            <div class="container text-center  my-5 " style="height: 500px;">
+                <img style="height: 300px; width: 300px;"
+                     th:src="@{/image/contactmanager.jpg}"/>
 
-				<h1 class="text-center text-secondary">Welcome to smart contact Manager</h1>
-				
-				<a th:href="@{/user/add-contact}"class="btn btn-primary btn-block text-uppercase"> Add new Contact</a>
-				</div>
-			</div>
+                <h1 class="text-center text-secondary">Welcome to smart contact Manager</h1>
+
+                <a th:href="@{/user/add-contact}" class="btn btn-primary btn-block text-uppercase"> Add new Contact</a>
+            </div>
+        </div>
 
 
-
-		</div>
-	</section>
+    </div>
+</section>
 </body>
 </html>
