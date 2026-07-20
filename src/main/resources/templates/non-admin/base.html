@@ -34,9 +34,10 @@
                 <li class="nav-item"><a class="nav-link active" th:href="@{/}">
                     Home </a></li>
 
-                <li class="nav-item"><a class="nav-link" href="#"> <span
-                        th:text="${user.name}"></span>
+                <li class="nav-item"><a class="nav-link" href="#">
+                    <span th:if="${user != null}" th:text="${user.name}"></span>
                 </a></li>
+
 
                 <li class="nav-item">
                     <form th:action="@{/logout}" method="post" class="m-0">

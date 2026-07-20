@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://thymeleaf.org" th:replace="base::layout(~{::section})">
+<head>
+    <meta charset="ISO-8859-1">
+    <title>Verify OTP Page</title>
+</head>
+<body>
+<section>
+    <div id="login">
+        <div class="container">
+            <div id="login-row"
+                 class="row justify-content-center align-items-center gap-4">
+                <div id="login-column" class="col-md-6">
+                    <div id="login-box" class="col-md-12">
+                        <div th:if="${message}"
+                             th:class="'alert alert-' + ${message.type}">
+                            <span th:text="${message.content}"></span>
+                        </div>
+                        <h3 class="text-center m-2">Verify New Password </h3>
+                        <form th:action="@{/submit_verify_otp}" method="post">
+
+                            <div class="form-group my-5">
+                                <input type="text" name="enteredotp" id="enteredotp" required
+                                       placeholder="Enter New Password Here.." class="form-control">
+
+                            </div>
+                            <div class="container text-center my-5">
+                                <button type="submit" class="btn btn-success">Verify Password</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

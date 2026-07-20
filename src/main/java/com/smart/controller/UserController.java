@@ -51,15 +51,23 @@ public class UserController {
 
     @ModelAttribute
     public void addCommonData(Model model, Principal principal) {
-        String name = principal.getName();
-        User user = userRepo.getUserByUserName(name);
-//		System.out.println("name-->" + user);
-        model.addAttribute("user", user);
+        System.out.println("Principal = " + principal);
+
+        if (principal != null) {
+            System.out.println("Username = " + principal.getName());
+
+            User user = userRepo.getUserByUserName(principal.getName());
+
+            System.out.println("User = " + user);
+
+            model.addAttribute("user", user);
+        }
     }
 
     @GetMapping("/index")
     public String dashboard(Model model, Principal principal) {
         model.addAttribute("title", "User Dashboard");
+        addCommonData(model, principal);
         return "non-admin/user_dashboard";
     }
 
@@ -239,12 +247,13 @@ public class UserController {
 
     @PostMapping("/changepassword")
     public String changePassword(@RequestParam("oldpassword") String oldPassword, @RequestParam("newpassword") String newPassword, Principal principal, RedirectAttributes redirectAttributes) {
-        System.out.println("Old password" + oldPassword);
-        System.out.println("new  password" + newPassword);
+
+        System.out.println("Principal = " + principal);
+        System.out.println("Principal Name = " + principal.getName());
 
         String name = principal.getName();
         User user = userRepo.getUserByUserName(name);
-        if (bCryptPasswordEncoder.matches(oldPassword, user.getPassword())) {
+        if (user != null && bCryptPasswordEncoder.matches(oldPassword, user.getPassword())) {
             user.setPassword(bCryptPasswordEncoder.encode(newPassword));
             userRepo.save(user);
             redirectAttributes.addFlashAttribute("message", new Message("You password is changed", "success"));
