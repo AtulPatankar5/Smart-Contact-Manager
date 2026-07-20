@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.thymeleaf.model.IModel;
 
 import java.security.Principal;
 import java.util.Random;
@@ -45,12 +46,12 @@ public class ForgotController {
 
 
         //checking if user is present in DB
-        if (user == null ) {
+        if (user == null) {
             redirectAttributes.addFlashAttribute("message", new Message("No user Found for this email ID ", "danger"));
             return "redirect:/forgot_email";
         }
         Random random = new Random();
-        int otp = 1000 + random.nextInt(9000);
+        int otp = 100000 + random.nextInt(900000);
 
 
         //setting otp and mail in session
@@ -61,12 +62,12 @@ public class ForgotController {
         SimpleMailMessage simpleMail = new SimpleMailMessage();
         simpleMail.setFrom("atulpatankar55555@gmail.com");
         simpleMail.setTo(email);
-        simpleMail.setSubject("New Password for Smart Contact Manager: Password Change");
-        simpleMail.setText("New Password is " + otp);
+        simpleMail.setSubject("OTP for Smart Contact Manager: OTP Change");
+        simpleMail.setText("New OTP is " + otp);
         javaMailSender.send(simpleMail);
 
         //setting success message
-        redirectAttributes.addFlashAttribute("message", new Message("Password sent successfully on " + email, "success"));
+        redirectAttributes.addFlashAttribute("message", new Message("OTP sent successfully on " + email, "success"));
 
         return "redirect:/verify_otp";// goes to GET mapping for Verify OTP
 
@@ -79,30 +80,40 @@ public class ForgotController {
     }
 
     @PostMapping("/submit_verify_otp")
-    public String verifyOTP(@RequestParam("enteredotp") int enteredotp, RedirectAttributes redirectAttributes, HttpSession session) {
+    public String verifyOTP(@RequestParam("enteredotp") int enteredotp, RedirectAttributes redirectAttributes, HttpSession session, Model model) {
 
         String email = (String) session.getAttribute("email");
         User user = userRepo.getUserByUserName(email);
 
-
         int generatedOTP = (Integer) session.getAttribute("otp");
         if (generatedOTP == enteredotp) {
-            user.setPassword(bCryptPasswordEncoder.encode(String.valueOf(enteredotp)));
-            userRepo.save(user);
-            redirectAttributes.addFlashAttribute(
-                    "message",
-                    new Message("Password changed!! Login Again with New Password", "success"));
-            session.removeAttribute("otp");
-            session.removeAttribute("email");
-            return "redirect:/signin";
+
+            model.addAttribute("email", email);
+
+            return "newPassword";
         } else {
             redirectAttributes.addFlashAttribute(
                     "message",
-                    new Message("Invalid Password", "danger"));
+                    new Message("Invalid OTP", "danger"));
 
             return "redirect:/verify_otp";
         }
 
+    }
+
+    @PostMapping("/setNewPassword")
+    public String setNewPassword(@RequestParam("newPassword") String newPassword, RedirectAttributes redirectAttributes, HttpSession session) {
+        String name=(String)session.getAttribute("email");
+        User user = userRepo.getUserByUserName(name);
+
+        user.setPassword(bCryptPasswordEncoder.encode(newPassword));
+        userRepo.save(user);
+        redirectAttributes.addFlashAttribute(
+                "message",
+                new Message("Password changed!! Login Again with New Password", "success"));
+        session.removeAttribute("otp");
+        session.removeAttribute("email");
+        return "redirect:/signin";
     }
 
 

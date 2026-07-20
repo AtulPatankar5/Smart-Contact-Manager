@@ -35,7 +35,7 @@ public class MyConfig {
 
         http.authorizeHttpRequests(auth -> auth.requestMatchers(
 
-                                "/css/**", "/js/**", "/image/**", "/", "/about", "/signup", "/register", "/forgot_email", "/sendOtp", "/verify_otp","/submit_verify_otp").permitAll()
+                                "/css/**", "/js/**", "/image/**", "/", "/about", "/signin", "/signup", "/register", "/forgot_email", "/sendOtp", "/verify_otp", "/submit_verify_otp", "/setNewPassword").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN").requestMatchers("/user/**").hasRole("USER").anyRequest()
                         .authenticated())
                 .formLogin(form -> form.loginPage("/signin").loginProcessingUrl("/dologin")
