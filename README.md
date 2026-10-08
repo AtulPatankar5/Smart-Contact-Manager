@@ -1,2 +1,2 @@
 # Smart-Contact-Manager
-Smart Contact Manager Java Spring Boor
+Smart Contact Manager Java Spring Boot
